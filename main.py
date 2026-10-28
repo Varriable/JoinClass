@@ -6,7 +6,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from scheduler import load_config, find_current_class, find_next_class
-from teams import join_meeting
+from teams import check_browser, join_meeting
 
 
 LOG_FILE = Path(__file__).with_name("join.log")
@@ -47,6 +47,13 @@ def main():
     if current:
         print(f"Class in progress: {current['name']}")
         print(f"Scheduled time: {current['start']} - {current['end']}")
+
+        try:
+            check_browser()
+        except RuntimeError as error:
+            print(error)
+            sys.exit(1)
+
         join_in_background(current)
         return
 

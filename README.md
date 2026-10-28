@@ -7,9 +7,11 @@ Checks your timetable and, if a class is on right now, opens Chrome and joins it
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install playwright
-.venv/bin/playwright install chrome
+.venv/bin/playwright install chromium
 cp classes.example.json classes.json
 ```
+
+If Google Chrome is installed it is used; otherwise it falls back to Playwright's own Chromium, which the `install chromium` step downloads (no sudo needed).
 
 Edit `classes.json` with your classes: day, start and end time (24-hour), meeting ID and passcode for each session.
 

@@ -9,11 +9,34 @@ MEETING_URL = "https://www.microsoft.com/en-us/microsoft-teams/join-a-meeting"
 # Sign in to Teams once in the window this opens and it stays signed in.
 PROFILE_DIR = Path.home() / ".config" / "teams-joiner-chrome"
 
+# Where Google Chrome lives on Linux; this is what Playwright's "chrome" channel uses.
+CHROME_PATH = Path("/opt/google/chrome/chrome")
+
+
+def browser_channel():
+    """Use Google Chrome if it is installed, otherwise Playwright's own Chromium."""
+    return "chrome" if CHROME_PATH.exists() else None
+
+
+def check_browser():
+    """Fail early, with a clear message, if there is no browser to open."""
+    if browser_channel():
+        return
+
+    with sync_playwright() as playwright:
+        if Path(playwright.chromium.executable_path).exists():
+            return
+
+    raise RuntimeError(
+        "No browser found. Install Google Chrome, or run: "
+        ".venv/bin/playwright install chromium"
+    )
+
 
 def join(playwright: Playwright, meeting) -> None:
     context = playwright.chromium.launch_persistent_context(
         PROFILE_DIR,
-        channel="chrome",  # use the installed Google Chrome, not Playwright's Chromium
+        channel=browser_channel(),
         headless=False,
         no_viewport=True,
         chromium_sandbox=True,  # Playwright passes --no-sandbox unless told otherwise
@@ -31,6 +54,6 @@ def join(playwright: Playwright, meeting) -> None:
 
 
 def join_meeting(meeting):
-    """Open Chrome and join the given class's meeting."""
+    """Open the browser and join the given class's meeting."""
     with sync_playwright() as playwright:
         join(playwright, meeting)
