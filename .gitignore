@@ -1,0 +1,8 @@
+# Personal timetable and meeting credentials
+classes.json
+*.pdf
+
+# Python
+__pycache__/
+*.pyc
+.venv/

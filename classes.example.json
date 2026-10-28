@@ -1,0 +1,26 @@
+{
+  "timezone": "Africa/Nairobi",
+  "join_early_minutes": 0,
+  "classes": [
+    {
+      "name": "Example Class",
+      "sessions": [
+        {
+          "day": "Monday",
+          "start": "08:15",
+          "end": "10:15",
+          "meeting_id": "123456789012345",
+          "passcode": "REPLACE_ME"
+        },
+        {
+          "day": "Thursday",
+          "start": "14:15",
+          "end": "16:15",
+          "meeting_id": "123456789012345",
+          "passcode": "REPLACE_ME"
+        }
+      ]
+    }
+  ],
+  "exceptions": []
+}
