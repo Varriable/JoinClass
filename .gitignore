@@ -1,6 +1,7 @@
 # Personal timetable and meeting credentials
 classes.json
 *.pdf
+join.log
 
 # Python
 __pycache__/

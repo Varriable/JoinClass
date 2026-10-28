@@ -16,6 +16,8 @@ def join(playwright: Playwright, meeting) -> None:
         channel="chrome",  # use the installed Google Chrome, not Playwright's Chromium
         headless=False,
         no_viewport=True,
+        chromium_sandbox=True,  # Playwright passes --no-sandbox unless told otherwise
+        ignore_default_args=["--enable-automation"],  # hides the "controlled by automated software" bar
     )
     page = context.pages[0] if context.pages else context.new_page()
     page.goto(MEETING_URL)

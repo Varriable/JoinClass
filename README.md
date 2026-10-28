@@ -30,7 +30,7 @@ source ~/.bashrc
 
 Then just run `joinclass`.
 
-If a class is in progress, Chrome opens and joins the meeting. Otherwise it prints the next class and exits.
+If a class is in progress, Chrome opens and joins the meeting in the background, so the terminal is free straight away (any errors go to `join.log`). Otherwise it prints the next class and exits.
 
 The first run opens a fresh Chrome profile (stored in `~/.config/teams-joiner-chrome`). Sign in to Teams there once and it stays signed in.
 
