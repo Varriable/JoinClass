@@ -1,0 +1,14 @@
+[project]
+name = "teams-class-joiner"
+version = "0.1.0"
+description = "Joins the Microsoft Teams meeting for the class that is on right now."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "playwright>=1.64",
+    # Windows has no built-in time zone database for zoneinfo.
+    "tzdata; sys_platform == 'win32'",
+]
+
+[tool.uv]
+package = false

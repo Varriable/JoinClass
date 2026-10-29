@@ -1,6 +1,5 @@
-import os
+import subprocess
 import sys
-import traceback
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -11,31 +10,38 @@ from teams import check_browser, join_meeting
 
 LOG_FILE = Path(__file__).with_name("join.log")
 
+# Passed to the background copy of this script so it joins instead of relaunching.
+FOREGROUND_FLAG = "--foreground"
 
-def join_in_background(meeting):
-    """Join the meeting in a detached process so the terminal is freed."""
-    if os.fork() > 0:
-        print(f"Joining in the background. Output goes to {LOG_FILE.name}.")
-        return
 
-    # Child: leave the terminal's session and send output to the log file.
-    os.setsid()
-    with open(os.devnull) as devnull, LOG_FILE.open("a") as log:
-        os.dup2(devnull.fileno(), 0)
-        os.dup2(log.fileno(), 1)
-        os.dup2(log.fileno(), 2)
+def join_in_background():
+    """Re-run this script detached from the terminal to do the joining."""
+    options = {}
 
-    try:
-        join_meeting(meeting)
-    except BaseException:
-        sys.stdout.flush()
-        traceback.print_exc()
-    finally:
-        os._exit(0)
+    if sys.platform == "win32":
+        options["creationflags"] = (
+            subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+        )
+    else:
+        options["start_new_session"] = True
+
+    with LOG_FILE.open("a") as log:
+        subprocess.Popen(
+            # -u keeps the log in order by not buffering output.
+            [sys.executable, "-u", str(Path(__file__).resolve()), FOREGROUND_FLAG],
+            stdin=subprocess.DEVNULL,
+            stdout=log,
+            stderr=log,
+            **options,
+        )
+
+    print(f"Joining in the background. Output goes to {LOG_FILE.name}.")
 
 
 def main():
     """Join the class that is on now, or report the next one."""
+    foreground = FOREGROUND_FLAG in sys.argv[1:]
+
     config = load_config()
     timezone = ZoneInfo(config["timezone"])
     now = datetime.now(timezone)
@@ -54,7 +60,10 @@ def main():
             print(error)
             sys.exit(1)
 
-        join_in_background(current)
+        if foreground:
+            join_meeting(current)
+        else:
+            join_in_background()
         return
 
     print("No class is currently scheduled.")

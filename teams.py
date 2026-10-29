@@ -1,3 +1,5 @@
+import os
+import sys
 from pathlib import Path
 
 from playwright.sync_api import Playwright, sync_playwright
@@ -9,13 +11,23 @@ MEETING_URL = "https://www.microsoft.com/en-us/microsoft-teams/join-a-meeting"
 # Sign in to Teams once in the window this opens and it stays signed in.
 PROFILE_DIR = Path.home() / ".config" / "teams-joiner-chrome"
 
-# Where Google Chrome lives on Linux; this is what Playwright's "chrome" channel uses.
-CHROME_PATH = Path("/opt/google/chrome/chrome")
+# Where Google Chrome is installed on each system; these are the places
+# Playwright's "chrome" channel looks.
+CHROME_PATHS = {
+    "linux": [Path("/opt/google/chrome/chrome")],
+    "win32": [
+        Path(os.environ.get(variable, "")) / "Google/Chrome/Application/chrome.exe"
+        for variable in ("PROGRAMFILES", "PROGRAMFILES(X86)", "LOCALAPPDATA")
+        if os.environ.get(variable)
+    ],
+    "darwin": [Path("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome")],
+}
 
 
 def browser_channel():
     """Use Google Chrome if it is installed, otherwise Playwright's own Chromium."""
-    return "chrome" if CHROME_PATH.exists() else None
+    paths = CHROME_PATHS.get(sys.platform, [])
+    return "chrome" if any(path.exists() for path in paths) else None
 
 
 def check_browser():
